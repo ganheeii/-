@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苹果风格日历</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f7;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .calendar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .month-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #007aff;
+        }
+
+        .month-btn:hover {
+            color: #005ecb;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .day {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            user-select: none;
+        }
+
+        .day:hover {
+            transform: scale(1.1);
+        }
+
+        .color-picker {
+            border: none;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .stats-btn {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border: none;
+            background-color: #007aff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .stats-btn:hover {
+            background-color: #005ecb;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>苹果风格日历</h2>
+
+    <!-- 颜色选择器 -->
+    <input type="color" id="colorPicker" class="color-picker" value="#ff3b30">
+
+    <!-- 年份 & 月份切换 -->
+    <div class="calendar-container">
+        <div class="month-selector">
+            <button class="month-btn" onclick="changeMonth(-1)">◀</button>
+            <h3 id="monthYear"></h3>
+            <button class="month-btn" onclick="changeMonth(1)">▶</button>
+        </div>
+
+        <!-- 日历 -->
+        <div class="calendar" id="calendar"></div>
+
+        <!-- 统计按钮 -->
+        <button class="stats-btn" onclick="goToStats()">查看统计</button>
+    </div>
+
+    <script>
+        const calendar = document.getElementById("calendar");
+        const colorPicker = document.getElementById("colorPicker");
+        const monthYearDisplay = document.getElementById("monthYear");
+
+        let currentDate = new Date(); // 当前日期
+
+        // 如果localStorage中有选中的月份，使用它
+        const selectedMonth = localStorage.getItem("selectedMonth");
+        if (selectedMonth) {
+            const [year, month] = selectedMonth.split("-");
+            currentDate = new Date(year, month - 1); // 设置为选定的月份
+            localStorage.removeItem("selectedMonth"); // 清除选中的月份
+        }
+
+        function renderCalendar() {
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            monthYearDisplay.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+            const storageKey = `calendar-${currentYear}-${currentMonth}`;
+            const savedColors = JSON.parse(localStorage.getItem(storageKey)) || {};
+
+            calendar.innerHTML = "";
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement("div");
+                dayElement.className = "day";
+                dayElement.textContent = day;
+
+                if (savedColors[day]) {
+                    dayElement.style.backgroundColor = savedColors[day];
+                }
+
+                dayElement.addEventListener("click", () => toggleColor(day, dayElement, storageKey));
+
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function changeMonth(step) {
+            currentDate.setMonth(currentDate.getMonth() + step);
+            renderCalendar();
+        }
+
+        function toggleColor(day, element, storageKey) {
+            let savedColors = JSON.parse(localStorage.getItem(storageKey)) || {};
+
+            if (savedColors[day]) {
+                delete savedColors[day];
+                element.style.backgroundColor = "";
+            } else {
+                savedColors[day] = colorPicker.value;
+                element.style.backgroundColor = colorPicker.value;
+            }
+
+            localStorage.setItem(storageKey, JSON.stringify(savedColors));
+        }
+
+        function goToStats() {
+            window.location.href = "stats.html"; // 跳转到统计页面
+        }
+
+        renderCalendar();
+    </script>
+
+</body>
+</html>

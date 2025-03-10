@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计页面</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f7;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stats-container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .stats-item {
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .color-box {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            padding: 10px 15px;
+            border: none;
+            background-color: #007aff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .back-btn:hover {
+            background-color: #005ecb;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>所有月份标记统计</h2>
+
+    <!-- 返回按钮 -->
+    <button class="back-btn" onclick="goBack()">返回主页面</button>
+
+    <div class="stats-container" id="statsContainer"></div>
+
+    <script>
+        // 返回主页面的函数
+        function goBack() {
+            window.location.href = "index.html"; // 返回到主页面
+        }
+
+        // 加载统计数据
+        function loadStats() {
+            const statsContainer = document.getElementById("statsContainer");
+            statsContainer.innerHTML = "";
+
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith("calendar-")) {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    let colorCounts = {};
+
+                    Object.values(data).forEach(color => {
+                        colorCounts[color] = (colorCounts[color] || 0) + 1;
+                    });
+
+                    // 生成统计条，点击后跳转到主页面指定月份
+                    const statsItem = document.createElement("div");
+                    statsItem.className = "stats-item";
+                    statsItem.innerHTML = `<strong>${key.replace("calendar-", "").replace("-", "年 ")}月:</strong>` +
+                        Object.keys(colorCounts).map(color => 
+                            `<span><span class="color-box" style="background:${color}"></span>${colorCounts[color]}个</span>`
+                        ).join(", ");
+                    
+                    statsItem.addEventListener("click", () => goToMonth(key.replace("calendar-", "")));
+
+                    statsContainer.appendChild(statsItem);
+                }
+            });
+        }
+
+        // 点击某个月份的统计条，跳转到该月的日历
+        function goToMonth(monthKey) {
+            const [year, month] = monthKey.split("-");
+            const date = new Date(year, month - 1); // month-1因为月份从0开始
+
+            // 将当前日期设置为选定月份
+            localStorage.setItem("selectedMonth", `${year}-${month}`);
+            window.location.href = "index.html"; // 跳转到主页面
+        }
+
+        // 页面加载时显示统计信息
+        loadStats();
+    </script>
+
+</body>
+</html>
