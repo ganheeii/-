@@ -1,189 +1,472 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>苹果风格日历</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f5f5f7;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .calendar-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: white;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            margin: auto;
-        }
-
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .month-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #007aff;
-        }
-
-        .month-btn:hover {
-            color: #005ecb;
-        }
-
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            width: 100%;
-        }
-
-        .day {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-            user-select: none;
-        }
-
-        .day:hover {
-            transform: scale(1.1);
-        }
-
-        .color-picker {
-            border: none;
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            background: none;
-            cursor: pointer;
-            appearance: none;
-        }
-
-        .stats-btn {
-            margin-top: 15px;
-            padding: 10px 15px;
-            border: none;
-            background-color: #007aff;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .stats-btn:hover {
-            background-color: #005ecb;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>苹果风格日历</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'San Francisco', Arial, sans-serif;
+      background-color: #F5F5F7;
+      padding: 20px;
+      position: relative;
+    }
+    /* 月份标题区域，按钮在左右 */
+    .month-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .month-container button {
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      transition: background-color 0.3s ease;
+    }
+    .month-container button:hover {
+      background-color: #0051A8;
+    }
+    #month-title {
+      font-size: 24px;
+      color: #333;
+    }
+    /* 日历样式 */
+    table {
+      width: 100%;
+      margin: 0 auto;
+      border-collapse: separate;
+      border-spacing: 10px;
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: #FFFFFF;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      text-align: center;
+      padding: 20px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      border-radius: 8px;
+    }
+    th {
+      background-color: #F4F4F4;
+      font-weight: bold;
+      color: #A1A1A6;
+      border: none;
+    }
+    td {
+      background-color: #f7f7f7;
+      color: #333;
+      border: none;
+    }
+    td:hover {
+      background-color: #D4D4D8;
+    }
+    /* 右上角浮动按钮 */
+    .floating-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #007AFF;
+      color: white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 30px;
+      text-align: center;
+      line-height: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+    }
+    .floating-button:hover {
+      background-color: #0051A8;
+    }
+    /* 弹出菜单 */
+    .menu {
+      position: absolute;
+      top: 80px;
+      right: 20px;
+      background-color: #FFFFFF;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      width: 200px;
+      display: none;
+      flex-direction: column;
+    }
+    .menu .menu-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+    .menu .menu-item span {
+      margin-left: 10px;
+      font-size: 16px;
+      color: #007AFF;
+    }
+    /* 苹果风格开关 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .switch input {
+      display: none;
+    }
+    .switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #E0E0E0;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+    .switch .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      border-radius: 50%;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+    }
+    .switch input:checked + .slider {
+      background-color: #4CD964;
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    /* 功能区域 */
+    #color-picker, #emoji-picker {
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+    #color {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+    }
+    /* 表情选择区域 */
+    #emoji-picker #emoji-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    #emoji-picker .emoji {
+      font-size: 40px;
+      cursor: pointer;
+      padding: 5px;
+      transition: transform 0.3s ease;
+    }
+    #emoji-picker .emoji:hover {
+      transform: scale(1.2);
+    }
+    /* 用户添加/删除表情区域 */
+    #emoji-add {
+      text-align: center;
+    }
+    #emoji-add input {
+      width: 50px;
+      text-align: center;
+      font-size: 18px;
+      padding: 5px;
+    }
+    #emoji-add button {
+      padding: 5px 10px;
+      font-size: 16px;
+      background-color: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+  </style>
 </head>
 <body>
 
-    <h2>苹果风格日历</h2>
+  <!-- 月份容器：上一月按钮、月份标题、下一月按钮 -->
+  <div class="month-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <button onclick="changeMonth(-1)">上一月</button>
+    <div id="month-title">2025年3月</div>
+    <button onclick="changeMonth(1)">下一月</button>
+  </div>
 
-    <!-- 颜色选择器 -->
-    <input type="color" id="colorPicker" class="color-picker" value="#ff3b30">
+  <!-- 日历表格 -->
+  <table id="calendar">
+    <thead>
+      <tr>
+        <th>日</th>
+        <th>一</th>
+        <th>二</th>
+        <th>三</th>
+        <th>四</th>
+        <th>五</th>
+        <th>六</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 日历天数由 JavaScript 动态生成 -->
+    </tbody>
+  </table>
 
-    <!-- 年份 & 月份切换 -->
-    <div class="calendar-container">
-        <div class="month-selector">
-            <button class="month-btn" onclick="changeMonth(-1)">◀</button>
-            <h3 id="monthYear"></h3>
-            <button class="month-btn" onclick="changeMonth(1)">▶</button>
-        </div>
+  <!-- 右上角浮动按钮 -->
+  <div class="floating-button" onclick="toggleMenu()">+</div>
 
-        <!-- 日历 -->
-        <div class="calendar" id="calendar"></div>
-
-        <!-- 统计按钮 -->
-        <button class="stats-btn" onclick="goToStats()">查看统计</button>
+  <!-- 弹出菜单 -->
+  <div class="menu" id="menu">
+    <div class="menu-item">
+      <div class="switch">
+        <input type="checkbox" id="marking-switch" onclick="toggleMarking()">
+        <label for="marking-switch" class="slider"></label>
+      </div>
+      <span>标记功能</span>
     </div>
+    <div class="menu-item">
+      <div class="switch">
+        <input type="checkbox" id="unmarking-switch" onclick="toggleUnmarking()">
+        <label for="unmarking-switch" class="slider"></label>
+      </div>
+      <span>取消标记功能</span>
+    </div>
+    <div class="menu-item">
+      <div class="switch">
+        <input type="checkbox" id="emoji-switch" onclick="toggleEmoji()">
+        <label for="emoji-switch" class="slider"></label>
+      </div>
+      <span>表情功能</span>
+    </div>
+  </div>
 
-    <script>
-        const calendar = document.getElementById("calendar");
-        const colorPicker = document.getElementById("colorPicker");
-        const monthYearDisplay = document.getElementById("monthYear");
+  <!-- 颜色选择区域（标记功能时显示） -->
+  <div id="color-picker">
+    <label for="color">选择颜色：</label>
+    <input type="color" id="color" onchange="updateColor(event)" value="#FFFF00">
+  </div>
 
-        let currentDate = new Date(); // 当前日期
+  <!-- 表情选择区域 -->
+  <div id="emoji-picker">
+    <div id="emoji-list"></div>
+    <!-- 用户添加/删除自定义表情 -->
+    <div id="emoji-add">
+      <input type="text" id="emoji-input" placeholder="输入 emoji" maxlength="2">
+      <button onclick="addEmoji()">添加</button>
+      <button onclick="deleteEmoji()">删除</button>
+    </div>
+  </div>
 
-        // 如果localStorage中有选中的月份，使用它
-        const selectedMonth = localStorage.getItem("selectedMonth");
-        if (selectedMonth) {
-            const [year, month] = selectedMonth.split("-");
-            currentDate = new Date(year, month - 1); // 设置为选定的月份
-            localStorage.removeItem("selectedMonth"); // 清除选中的月份
+  <script>
+    // 全局变量定义
+    let currentMonth = 2; // 0表示1月，1表示2月，2表示3月
+    let currentYear = 2025;
+    let markingEnabled = false;
+    let unmarkingEnabled = false;
+    let emojiEnabled = false;
+    let selectedColor = '#FFFF00';
+    let markedDays = {}; // { year: { month: { day: color } } }
+    let emojiDays = {};  // { year: { month: { day: emoji } } }
+    let selectedEmoji = '';
+
+    // 默认表情（默认表情不可删除）
+    const defaultEmojis = ["😊", "😂", "❤️", "🎉", "😎"];
+    // 表情库：从 localStorage 读取，没有则使用默认表情的拷贝
+    let emojiLibrary = JSON.parse(localStorage.getItem("emojiLibrary")) || defaultEmojis.slice();
+
+    // 渲染表情库到 #emoji-list 区域
+    function loadEmojiLibrary() {
+      const emojiListDiv = document.getElementById("emoji-list");
+      emojiListDiv.innerHTML = "";
+      emojiLibrary.forEach(emoji => {
+        const span = document.createElement("span");
+        span.className = "emoji";
+        span.textContent = emoji;
+        span.onclick = () => selectEmoji(emoji);
+        emojiListDiv.appendChild(span);
+      });
+    }
+
+    // 添加自定义表情
+    function addEmoji() {
+      const input = document.getElementById("emoji-input");
+      const newEmoji = input.value.trim();
+      if (newEmoji && !emojiLibrary.includes(newEmoji)) {
+        emojiLibrary.push(newEmoji);
+        localStorage.setItem("emojiLibrary", JSON.stringify(emojiLibrary));
+        loadEmojiLibrary();
+        input.value = "";
+      }
+    }
+
+    // 删除自定义表情（默认表情不可删除）
+    function deleteEmoji() {
+      const input = document.getElementById("emoji-input");
+      const emojiToDelete = input.value.trim();
+      if (!emojiToDelete) return;
+      if (defaultEmojis.includes(emojiToDelete)) {
+        alert("默认表情不能删除！");
+        return;
+      }
+      const index = emojiLibrary.indexOf(emojiToDelete);
+      if (index !== -1) {
+        emojiLibrary.splice(index, 1);
+        localStorage.setItem("emojiLibrary", JSON.stringify(emojiLibrary));
+        loadEmojiLibrary();
+        input.value = "";
+      } else {
+        alert("未找到该表情！");
+      }
+    }
+
+    // 生成日历，根据年份和月份生成
+    function generateCalendar(year, month) {
+      const firstDay = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      document.getElementById('month-title').textContent = `${year}年${month + 1}月`;
+      const tbody = document.getElementById('calendar').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = "";
+      let row = document.createElement('tr');
+      // 添加空白单元格（星期前），无边框
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('td');
+        emptyCell.style.border = "none";
+        emptyCell.style.backgroundColor = "transparent";
+        row.appendChild(emptyCell);
+      }
+      // 添加每一天
+      for (let day = 1; day <= totalDays; day++) {
+        const cell = document.createElement('td');
+        cell.textContent = day;
+        cell.onclick = () => handleCellClick(cell, day);
+        // 应用标记颜色
+        if (markedDays[year] && markedDays[year][month] && markedDays[year][month][day]) {
+          cell.style.backgroundColor = markedDays[year][month][day];
         }
-
-        function renderCalendar() {
-            const currentMonth = currentDate.getMonth();
-            const currentYear = currentDate.getFullYear();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-            monthYearDisplay.textContent = `${currentYear}年 ${currentMonth + 1}月`;
-
-            const storageKey = `calendar-${currentYear}-${currentMonth}`;
-            const savedColors = JSON.parse(localStorage.getItem(storageKey)) || {};
-
-            calendar.innerHTML = "";
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayElement = document.createElement("div");
-                dayElement.className = "day";
-                dayElement.textContent = day;
-
-                if (savedColors[day]) {
-                    dayElement.style.backgroundColor = savedColors[day];
-                }
-
-                dayElement.addEventListener("click", () => toggleColor(day, dayElement, storageKey));
-
-                calendar.appendChild(dayElement);
-            }
+        // 应用表情
+        if (emojiDays[year] && emojiDays[year][month] && emojiDays[year][month][day]) {
+          const emojiSpan = document.createElement('span');
+          emojiSpan.textContent = emojiDays[year][month][day];
+          cell.appendChild(emojiSpan);
         }
-
-        function changeMonth(step) {
-            currentDate.setMonth(currentDate.getMonth() + step);
-            renderCalendar();
+        row.appendChild(cell);
+        if (row.children.length === 7) {
+          tbody.appendChild(row);
+          row = document.createElement('tr');
         }
+      }
+      if (row.children.length > 0) {
+        tbody.appendChild(row);
+      }
+    }
 
-        function toggleColor(day, element, storageKey) {
-            let savedColors = JSON.parse(localStorage.getItem(storageKey)) || {};
+    // 切换月份
+    function changeMonth(offset) {
+      currentMonth += offset;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      generateCalendar(currentYear, currentMonth);
+    }
 
-            if (savedColors[day]) {
-                delete savedColors[day];
-                element.style.backgroundColor = "";
-            } else {
-                savedColors[day] = colorPicker.value;
-                element.style.backgroundColor = colorPicker.value;
-            }
+    // 切换菜单显示/隐藏
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
 
-            localStorage.setItem(storageKey, JSON.stringify(savedColors));
+    // 标记功能开关
+    function toggleMarking() {
+      markingEnabled = !markingEnabled;
+      unmarkingEnabled = false;
+      emojiEnabled = false;
+      document.getElementById('color-picker').style.display = markingEnabled ? 'block' : 'none';
+      document.getElementById('unmarking-switch').checked = false;
+      document.getElementById('emoji-switch').checked = false;
+    }
+
+    // 取消标记功能开关（同时取消该日的表情）
+    function toggleUnmarking() {
+      unmarkingEnabled = !unmarkingEnabled;
+      markingEnabled = false;
+      emojiEnabled = false;
+      document.getElementById('marking-switch').checked = false;
+      document.getElementById('emoji-switch').checked = false;
+    }
+
+    // 表情功能开关
+    function toggleEmoji() {
+      emojiEnabled = !emojiEnabled;
+      markingEnabled = false;
+      unmarkingEnabled = false;
+      document.getElementById('marking-switch').checked = false;
+      document.getElementById('unmarking-switch').checked = false;
+      document.getElementById('emoji-picker').style.display = emojiEnabled ? 'block' : 'none';
+    }
+
+    // 点击单元格处理事件
+    function handleCellClick(cell, day) {
+      if (markingEnabled) {
+        if (!markedDays[currentYear]) markedDays[currentYear] = {};
+        if (!markedDays[currentYear][currentMonth]) markedDays[currentYear][currentMonth] = {};
+        markedDays[currentYear][currentMonth][day] = selectedColor;
+        cell.style.backgroundColor = selectedColor;
+      } else if (unmarkingEnabled) {
+        if (markedDays[currentYear] && markedDays[currentYear][currentMonth] && markedDays[currentYear][currentMonth][day]) {
+          delete markedDays[currentYear][currentMonth][day];
+          cell.style.backgroundColor = "";
         }
-
-        function goToStats() {
-            window.location.href = "stats.html"; // 跳转到统计页面
+        if (emojiDays[currentYear] && emojiDays[currentYear][currentMonth] && emojiDays[currentYear][currentMonth][day]) {
+          delete emojiDays[currentYear][currentMonth][day];
+          generateCalendar(currentYear, currentMonth);
         }
+      } else if (emojiEnabled && selectedEmoji) {
+        if (!emojiDays[currentYear]) emojiDays[currentYear] = {};
+        if (!emojiDays[currentYear][currentMonth]) emojiDays[currentYear][currentMonth] = {};
+        emojiDays[currentYear][currentMonth][day] = selectedEmoji;
+        generateCalendar(currentYear, currentMonth);
+      }
+    }
 
-        renderCalendar();
-    </script>
+    // 更新颜色选择
+    function updateColor(event) {
+      selectedColor = event.target.value;
+    }
+
+    // 选择表情
+    function selectEmoji(emoji) {
+      selectedEmoji = emoji;
+    }
+
+    // 初始化日历与表情库
+    loadEmojiLibrary();
+    generateCalendar(currentYear, currentMonth);
+  </script>
 
 </body>
 </html>
+
