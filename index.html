@@ -40,8 +40,55 @@
       font-size: 24px;
       color: #333;
     }
+
+      /* 日历容器 */
+        table {
+            width: 100%;
+            max-width: 500px;  /* 设置最大宽度 */
+            margin: 0 auto;
+            border-collapse: separate;
+            border-spacing: 5px; /* 减小间距 */
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #FFFFFF;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+            font-size: 14px; /* 调整字体大小 */
+        }
+
+        th, td {
+            text-align: center;
+            padding: 12px; /* 减小 padding */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border-radius: 8px; /* 圆角效果 */
+        }
+
+        th {
+            background-color: #F4F4F4;
+            font-weight: bold;
+            color: #A1A1A6; /* 星期的颜色 */
+            border: none; /* 去掉星期部分的边框 */
+        }
+
+        td {
+            background-color: #f7f7f7; /* 日子的背景色 */
+            color: #333; /* 深色的天数字体 */
+            border: none; /* 去掉天数部分的边框 */
+        }
+
+        td:hover {
+            background-color: #D4D4D8;
+        }
+
+        /* 月份标题 */
+        #month-title {
+            text-align: center;
+            font-size: 18px; /* 调整字体大小 */
+            margin-bottom: 15px;
+        }
+    
     /* 日历样式 */
-    table {
+ /*   table {
       width: 100%;
       margin: 0 auto;
       border-collapse: separate;
@@ -73,6 +120,7 @@
     td:hover {
       background-color: #D4D4D8;
     }
+ */   
     /* 右上角浮动按钮 */
     .floating-button {
       position: absolute;
